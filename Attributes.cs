@@ -1,63 +1,84 @@
-// using System.Collections.Generic;
-// using System;
+using System.Collections.Generic;
+using System;
 
-// public class Attributes {
-//     private Dictionary<string, IAttribute> attributes;
+public class Attributes {
+    private Dictionary<string, IAttribute> attributes;
 
-//     public Attributes() {
-//         this.attributes = new Dictionary<string, IAttribute>();
-//     }
+    public Attributes() {
+        this.attributes = new Dictionary<string, IAttribute>();
+    }
 
-//     public Attributes Clone() {
-//         Attributes na = new Attributes();
-//     }
+    public Attributes(Attributes source) {
+        this.attributes = new Dictionary<string, IAttribute>(source.attributes);
+    }
 
-//     public void AddAttribute(IAttribute attribute) {
-//         string name = attribute.GetName();
-//         if (this.attributes.ContainsKey(name))
-//             throw new Exception($"This attribute already exists: {name}");
+    public Attributes(params (string, IAttribute)[] kvps) {
+        this.attributes = new Dictionary<string, IAttribute>();
+        this.Add(kvps);
+    }
 
-//         this.attributes.Add(name, attribute);
-//     }
+    public void Add(params (string, IAttribute)[] kvps) {
+        foreach ((string name, IAttribute attr) kvp in kvps) {
+            this.Add(kvp.name, kvp.attr);
+        }
+    }
 
-//     public void Overwrite(IAttribute attribute) {
-//         string name = attribute.GetName();
-//         if (!this.attributes.ContainsKey(name))
-//             throw new Exception($"This attribute does not exist: {name}");
+    public void Add(string name, IAttribute attribute) {
+        if (this.attributes.ContainsKey(name))
+            throw new Exception($"This attribute already exists: {name}");
 
-//         this.attributes[name] = attribute;
-//     }
+        this.attributes.Add(name, attribute);
+    }
 
-//     public IAttribute GetAttribute(string name) {
-//         return this.attributes[name];
-//     }
+    public void Overwrite(params (string, IAttribute)[] kvps) {
+        foreach ((string name, IAttribute attr) kvp in kvps) {
+            this.Overwrite(kvp.name, kvp.attr);
+        }
+    }
 
-//     public bool Matches(Attributes other) {
-//         bool matches = true;
+    public void Overwrite(string name, IAttribute attribute) {
+        if (!this.attributes.ContainsKey(name))
+            throw new Exception($"This attribute does not exist: {name}");
 
-//         // Check common attributes
-//         foreach (string key in this.attributes.Keys & other.attributes.Keys) {
-//             mathches &= this.attributes[key].Matches(other);
-//         }
+        this.attributes[name] = attribute;
+    }
 
-//         if (!matches)
-//             return false;
+    public IAttribute Get(string name) {
+        return this.attributes[name];
+    }
 
-//         DefaultAttribute da = new DefaultAttribute("dummyattribute");
+    public bool Matches(Attributes other) {
+        bool matches = true;
 
-//         // Check the attributes that are only here
-//         foreach (string key in this.attributes.Keys - other.attributes.Keys) {
-//             this.attributes[key].Matches(da);
-//         }
+        // Check common attributes
+        HashSet<string> commonKeys = new HashSet<string>(this.attributes.Keys);
+        commonKeys.IntersectWith(other.attributes.Keys);
+        foreach (string key in commonKeys) {
+            matches &= this.attributes[key].Matches(other.attributes[key]);
+        }
 
-//         if (!matches)
-//             return false;
+        if (!matches)
+            return false;
 
-//         // Check the attributes that are only in the other
-//         foreach (string key in other.attributes.Keys - this.attributes.Keys) {
-//             other.attributes[key].Matches(da);
-//         }
+        DefaultAttribute da = new DefaultAttribute();
 
-//         return matches;
-//     }
-// }
+        // Check the attributes that are only here
+        HashSet<string> hereKeys = new HashSet<string>(this.attributes.Keys);
+        hereKeys.ExceptWith(other.attributes.Keys);
+        foreach (string key in hereKeys) {
+            this.attributes[key].Matches(da);
+        }
+
+        if (!matches)
+            return false;
+
+        // Check the attributes that are only in the other
+        HashSet<string> thereKeys = new HashSet<string>(other.attributes.Keys);
+        hereKeys.ExceptWith(this.attributes.Keys);
+        foreach (string key in thereKeys) {
+            other.attributes[key].Matches(da);
+        }
+
+        return matches;
+    }
+}

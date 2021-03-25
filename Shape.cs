@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-public interface Shape {
-    string Symbol {get;}
-    List<Shape> NextShapes();
-    List<Point> GetVertices();
+namespace Shape {
+    public interface IShape {
+        string Symbol {get;}
+        Attributes Attributes {get;}
+        List<IShape> NextShapes();
+        List<Point> GetVertices();
+    }
 }

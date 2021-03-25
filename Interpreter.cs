@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using Shape;
 
 public class Interpreter {
-    public static List<Shape> Interpret(Shape start, uint max) {
-        Queue<Shape> shapeQueue = new Queue<Shape>();
+    public static List<IShape> Interpret(IShape start, uint max) {
+        Queue<IShape> shapeQueue = new Queue<IShape>();
         shapeQueue.Enqueue(start);
 
-        List<Shape> output = new List<Shape>();
-        List<Shape> righthand;
+        List<IShape> output = new List<IShape>();
+        List<IShape> righthand;
         for (uint i = 0; i < max; ++i) {
-            Shape s = shapeQueue.Dequeue();
+            IShape s = shapeQueue.Dequeue();
 
             righthand = s.NextShapes();
 
@@ -17,7 +18,13 @@ public class Interpreter {
                 i -= 1;
             }
 
-            else foreach(Shape shape in righthand)
+            else if (righthand[0].Symbol == "Epsilon") {
+                // In case of epsilon, we want to remove the shape
+                // For that, we have to not add the shapes into the queue, nor
+                // to the output
+            }
+
+            else foreach(IShape shape in righthand)
                 shapeQueue.Enqueue(shape);
         }
 

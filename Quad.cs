@@ -2,37 +2,44 @@ using System.Collections.Generic;
 using System.Drawing;
 using System;
 
-public class Quad : Shape {
-    public string Symbol {get { return "Quad";}}
-    private static readonly List<Shape> dummyList = new List<Shape>();
+namespace Shape {
+    public class Quad : IShape {
+        private static readonly List<IShape> dummyList = new List<IShape>();
+        private Attributes attributes;
+        public Point v1, v2, v3, v4;
+        private Rules rules;
+        private Random rnd;
 
-    public Point v1, v2, v3, v4;
-    private Rules rules;
-    private Random rnd;
+        public string Symbol {get { return "Quad";}}
+        public Attributes Attributes {get {return this.attributes;}}
 
-    
-    public Quad(Rules rules, Point v1, Point v2, Point v3, Point v4) {
-        this.v1 = v1;
-        this.v2 = v2;
-        this.v3 = v3;
-        this.v4 = v4;
-
-        this.rules = rules;
+        private void InitializeVertices((Point v1, Point v2, Point v3, Point v4) vertices) {
+            this.v1 = vertices.v1;
+            this.v2 = vertices.v2;
+            this.v3 = vertices.v3;
+            this.v4 = vertices.v4;
+        }
         
-        this.rnd = new Random();
-    }
-
-    public List<Shape> NextShapes() {
-        List<Func<Shape, List<Shape>>> r = this.rules.GetRules<Quad>();
-        if (r.Count > 0) {
-            int index = this.rnd.Next(r.Count);
-            return r[index](this);
+        public Quad(Rules rules, (Point v1, Point v2, Point v3, Point v4) vertices) {
+            this.InitializeVertices(vertices);
+            this.rules = rules;
+            this.rnd = new Random();
+            this.attributes = new Attributes();
         }
 
-        return dummyList;
-    }
+        public Quad(Rules rules, Attributes attributes, (Point v1, Point v2, Point v3, Point v4) vertices) {
+            this.InitializeVertices(vertices);
+            this.rules = rules;
+            this.rnd = new Random();
+            this.attributes = attributes;
+        }
 
-    public List<Point> GetVertices() {
-        return new List<Point> {this.v1, this.v2, this.v3, this.v4};
+        public List<IShape> NextShapes() {
+            return this.rules.Next<Quad>(this.attributes)(this);
+        }
+
+        public List<Point> GetVertices() {
+            return new List<Point> {this.v1, this.v2, this.v3, this.v4};
+        }
     }
 }
