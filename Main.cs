@@ -7,8 +7,10 @@ using System;
 using Shape;
 
 public class MainClass {
-    private static Point BisectLine(Point v1, Point v2, float x) {
-        return new Point((int) (v1.X * x + v2.X * (1f - x)), (int) (v1.Y * x + v2.Y * (1f - x)));
+    private static float[] BisectLine(float[] v1, float[] v2, float x) {
+        // return new Point((int) (v1.X * x + v2.X * (1f - x)), (int) (v1.Y * x + v2.Y * (1f - x)));
+        float conx = 1f - x;
+        return new float[] {v1[0] * x + v2[0] * conx, v1[1] * x + v2[1] * conx};
     }
 
     public static void Main() {
@@ -19,10 +21,10 @@ public class MainClass {
         Rules rules = new Rules();
         rules.AddRule(null,
             (Quad quad) => {
-                Point nv1 = BisectLine(quad.v1, quad.v2, 0.5f); 
-                Point nv2 = BisectLine(quad.v2, quad.v3, 0.5f); 
-                Point nv3 = BisectLine(quad.v3, quad.v4, 0.5f); 
-                Point nv4 = BisectLine(quad.v4, quad.v1, 0.5f); 
+                float[] nv1 = BisectLine(quad.v1, quad.v2, 0.5f); 
+                float[] nv2 = BisectLine(quad.v2, quad.v3, 0.5f); 
+                float[] nv3 = BisectLine(quad.v3, quad.v4, 0.5f); 
+                float[] nv4 = BisectLine(quad.v4, quad.v1, 0.5f); 
 
                 // A quad with the vertices as bipartitions of originals edges
 
@@ -57,13 +59,13 @@ public class MainClass {
             ), 
 
             (Quad quad) => {
-                Point nv1 = BisectLine(quad.v1, quad.v2, 0.5f);
-                Point nv2 = BisectLine(quad.v1, nv1, 0.5f);
-                Point nv3 = BisectLine(nv1, quad.v2, 0.5f);
+                float[] nv1 = BisectLine(quad.v1, quad.v2, 0.5f);
+                float[] nv2 = BisectLine(quad.v1, nv1, 0.5f);
+                float[] nv3 = BisectLine(nv1, quad.v2, 0.5f);
 
-                Point nv4 = BisectLine(quad.v4, quad.v3, 0.5f);
-                Point nv5 = BisectLine(quad.v4, nv4, 0.5f);
-                Point nv6 = BisectLine(nv4, quad.v3, 0.5f);
+                float[] nv4 = BisectLine(quad.v4, quad.v3, 0.5f);
+                float[] nv5 = BisectLine(quad.v4, nv4, 0.5f);
+                float[] nv6 = BisectLine(nv4, quad.v3, 0.5f);
 
                 Quad q1 = new Quad(rules, quad.Attributes, (quad.v1, nv2, nv5, quad.v4));
                 Quad q2 = new Quad(rules, quad.Attributes, (nv2, nv1, nv4, nv5));
@@ -80,8 +82,8 @@ public class MainClass {
             ),
 
             (Quad quad) => {
-                Point nv1 = BisectLine(quad.v1, quad.v2, 0.5f);
-                Point nv2 = BisectLine(quad.v4, quad.v3, 0.5f);
+                float[] nv1 = BisectLine(quad.v1, quad.v2, 0.5f);
+                float[] nv2 = BisectLine(quad.v4, quad.v3, 0.5f);
 
                 Quad q1 = new Quad(rules, quad.Attributes, (quad.v1, nv1, nv2, quad.v4));
                 Quad q2 = new Quad(rules, quad.Attributes, (nv1, quad.v2, quad.v3, nv2));
@@ -103,10 +105,10 @@ public class MainClass {
             new Attributes(
                 ("Angle", new ScalarAttribute(0f))
             ),
-           (new Point(min, max), 
-            new Point(max, max), 
-            new Point(max, min), 
-            new Point(min, min))
+           (new float[]{min, max}, 
+            new float[]{max, max}, 
+            new float[]{max, min}, 
+            new float[]{min, min})
         );
 
         List<IShape> shapes = Interpreter.Interpret(start, 10);
@@ -124,15 +126,21 @@ public class MainClass {
         Pen pen = new Pen(Color.Black, 3);
 
         foreach (IShape shape in shapes) {
-            List<Point> vertices = shape.GetVertices();
+            List<float[]> vertices = shape.GetVertices();
+            List<Point> points = new List<Point>();
 
-            for (int i = 1; i < vertices.Count; ++i) {
+            foreach (float[] vertex in vertices) {
+                points.Add(new Point((int)vertex[0], (int)vertex[1]));
+            }
+            
+
+            for (int i = 1; i < points.Count; ++i) {
                 // Draws the line 
-                gr.DrawLine(pen, vertices[i - 1], vertices[i]); 
+                gr.DrawLine(pen, points[i - 1], points[i]); 
             }
 
             // Last line wraps around
-            gr.DrawLine(pen, vertices[vertices.Count - 1], vertices[0]);
+            gr.DrawLine(pen, points[points.Count - 1], points[0]);
         }
         
     }

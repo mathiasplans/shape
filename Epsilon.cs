@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Drawing;
 using System;
 
 namespace Shape {
@@ -11,8 +10,8 @@ namespace Shape {
             return new List<IShape>();
         }
 
-        public List<Point> GetVertices() {
-            return new List<Point>();
+        public List<float[]> GetVertices() {
+            return new List<float[]>();
         }
     }
 }
