@@ -10,8 +10,12 @@ namespace Shape {
             return new List<IShape>();
         }
 
-        public List<float[]> GetVertices() {
-            return new List<float[]>();
+        public List<Vertex> GetVertices() {
+            return new List<Vertex>();
+        }
+
+        public List<Line> GetLines() {
+            return new List<Line>();
         }
     }
 }
