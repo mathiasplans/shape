@@ -1,37 +1,69 @@
-// using System.Collections;
-// using System.Collections.Generic;
-// using System;
-// using Shape;
+using System.Collections;
+using System.Collections.Generic;
+using System;
 
-// public abstract class ShapeGraph {
-//     protected class SGVertex {
-//         public readonly IShape Shape;
-//         public readonly HashSet<(SGVertex, Attributes)> Connections;
-//         public int Rank {get {return this.connections.Count;}}
-//         public SGVertex(IShape shape) {
-//             this.Shape = shape;
-//             this.Connections = new HashSet<(SGVertex, Attributes)>();
-//         }
+namespace Shape {
+    public class ShapeGraph {
+        protected class SGNode {
+            private Type symbol;
+            private IShape shape;
+            private HashSet<(SGNode, Attributes)> connections;
 
-//         public void Connect(SGVertex other, Attributes attributes) {
-//             this.Connections.Add((other, attributes));
-//             other.Connections.Add((this, attributes));
-//         }
-//     }
+            public IShape Shape {get {return this.shape;}}
 
-//     HashSet<SGVertex> vertices = new HashSet<SGVertex>();
+            public SGNode(IShape shape) {
+                this.shape = shape;
+                this.symbol = shape.Symbol;
+                this.connections = new HashSet<(SGNode, Attributes)>();
+            }
 
-//     protected abstract bool AreConnected(SGVertex first, SGVertex second);
+            public void Connect(SGNode other, Attributes attr) {
+                this.connections.Add((other, attr));
+                other.connections.Add((this, attr));
+            }
+        }
 
-//     /**
-//      * Function for converting a collection of shapes
-//      * into the shape graph
-//      */
-//     public abstract void ToGraph(List<IShape> shapes);
+        protected HashSet<SGNode> nodes;
 
-//     /**
-//      * Function for converting the shape graph into
-//      * a collection of shapes
-//      */
-//     public abstract List<IShape> ToShapes();
-// }
+        private void AddGraph(ShapeGraph other) {
+            if (other == null)
+                return;
+
+            // Get the nodes
+            HashSet<SGNode> shapeNodes = other.nodes;
+
+            // For each node in the other shape graph, check
+            // if there are connections to this shape graph
+            foreach (SGNode otherNode in shapeNodes) {
+                foreach (SGNode ownNode in this.nodes) {
+                    // NOTE: LineOverlap is valid for 2D only!
+                    if (otherNode.Shape.LineOverlap(ownNode.Shape))
+                        otherNode.Connect(ownNode, null);
+                } 
+            }
+
+            // Then add the nodes in the other graph to own graph
+            foreach (SGNode otherNode in shapeNodes) {
+                this.nodes.Add(otherNode);
+            }
+        }
+
+        public ShapeGraph() {
+            this.nodes = new HashSet<SGNode>();
+        }
+
+        public ShapeGraph(IShape shape) {
+            this.nodes = new HashSet<SGNode>();
+
+            this.AddGraph(shape.Graph);
+        }
+
+        public ShapeGraph(List<IShape> shapes) {
+            this.nodes = new HashSet<SGNode>();
+
+            foreach (IShape shape in shapes) {
+                this.AddGraph(shape.Graph);
+            }
+        }
+    }
+}

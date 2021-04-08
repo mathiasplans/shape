@@ -9,9 +9,17 @@ namespace Shape {
         public Line l1, l2, l3;
         private Rules rules;
         private Random rnd;
+        private ShapeGraph shapeGraph;
         
-        public string Symbol {get { return "Triad";}}
+        public Type Symbol {get { return typeof(Triad);}}
         public Attributes Attributes {get {return this.attributes;}}
+
+        public ShapeGraph Graph {get {return this.shapeGraph;}}
+
+        public static ShapeGraph Prototype() {
+            return new ShapeGraph();
+        }
+
 
         private void InitializeVertices((Vertex v1, Vertex v2, Vertex v3) vertices) {
             this.v1 = vertices.v1;
@@ -21,20 +29,22 @@ namespace Shape {
             this.l1 = new Line(this.v1, this.v2);
             this.l2 = new Line(this.v2, this.v3);
             this.l3 = new Line(this.v3, this.v1);
+
+            this.shapeGraph = new ShapeGraph(this);
         }
         
         public Triad(Rules rules, (Vertex v1, Vertex v2, Vertex v3) vertices) {
-            this.InitializeVertices(vertices);
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = new Attributes();
+            this.InitializeVertices(vertices);
         }
 
         public Triad(Rules rules, Attributes attributes, (Vertex v1, Vertex v2, Vertex v3) vertices) {
-            this.InitializeVertices(vertices);
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = attributes;
+            this.InitializeVertices(vertices);
         }
 
         public List<IShape> NextShapes() {

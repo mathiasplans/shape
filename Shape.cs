@@ -1,9 +1,14 @@
 using System.Collections.Generic;
+using System;
 
 namespace Shape {
     public interface IShape {
-        string Symbol {get;}
+        Type Symbol {get;}
         Attributes Attributes {get;}
+        ShapeGraph Graph {get;}
+        static ShapeGraph Prototype() {
+            return null;
+        }
         List<IShape> NextShapes();
         List<Vertex> GetVertices();
         List<Line> GetLines();

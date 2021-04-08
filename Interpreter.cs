@@ -18,7 +18,7 @@ public class Interpreter {
                 i -= 1;
             }
 
-            else if (righthand[0].Symbol == "Epsilon") {
+            else if (righthand[0].Symbol == typeof(Epsilon)) {
                 // In case of epsilon, we want to remove the shape
                 // For that, we have to not add the shapes into the queue, nor
                 // to the output
