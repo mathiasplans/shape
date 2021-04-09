@@ -15,7 +15,7 @@ namespace Shape {
         public Attributes Attributes {get {return this.attributes;}}
         public ShapeGraph Graph {get {return this.shapeGraph;}}
         public static ShapeGraph Prototype() {
-            return new ShapeGraph();
+            return new ShapeGraph(typeof(Quad));
         }
 
 

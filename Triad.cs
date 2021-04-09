@@ -17,7 +17,7 @@ namespace Shape {
         public ShapeGraph Graph {get {return this.shapeGraph;}}
 
         public static ShapeGraph Prototype() {
-            return new ShapeGraph();
+            return new ShapeGraph(typeof(Triad));
         }
 
 

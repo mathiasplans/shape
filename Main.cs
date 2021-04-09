@@ -109,7 +109,8 @@ public class MainClass {
             new Vertex(min, min))
         );
 
-        List<IShape> shapes = Interpreter.Interpret(start, 10);
+        // List<IShape> shapes = Interpreter.Interpret(start, 10);
+        List<IShape> shapes = Interpreter2.Interpret(start, rules, 10);
 
         return shapes;
     }

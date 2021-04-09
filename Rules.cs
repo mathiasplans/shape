@@ -30,10 +30,14 @@ public class Rules {
     }
     
     public List<(Func<IShape, List<IShape>>, Attributes)> GetRules<T>() {
-        if (!this.rules.ContainsKey(typeof(T)))
+        return this.GetRules(typeof(T));
+    }
+
+    public List<(Func<IShape, List<IShape>>, Attributes)> GetRules(Type key) {
+        if (!this.rules.ContainsKey(key))
             return this.rules[typeof(void)];
 
-        return this.rules[typeof(T)];
+        return this.rules[key];
     }
 
     public Func<IShape, List<IShape>> Next<T>() {
@@ -73,7 +77,8 @@ public class Rules {
     public HashSet<Type> GetAllLHS() {
         HashSet<Type> o = new HashSet<Type>();
         foreach(Type key in this.rules.Keys) {
-            o.Add(key);
+            if (key != typeof(void))
+                o.Add(key);
         }
 
         return o;

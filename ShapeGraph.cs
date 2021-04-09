@@ -17,9 +17,37 @@ namespace Shape {
                 this.connections = new HashSet<(SGNode, Attributes)>();
             }
 
+            public SGNode(Type symbol) {
+                this.shape = null;
+                this.symbol = symbol;
+                this.connections = new HashSet<(SGNode, Attributes)>();
+            }
+
             public void Connect(SGNode other, Attributes attr) {
                 this.connections.Add((other, attr));
                 other.connections.Add((this, attr));
+            }
+
+            public void Remove() {
+                foreach ((SGNode, Attributes) connection in this.connections) {
+                    connection.Item1.connections.Remove((this, connection.Item2));
+                }
+            }
+
+            public static bool operator ==(SGNode one, SGNode other) {
+                return one.symbol == other.symbol;
+            }
+
+            public static bool operator !=(SGNode one, SGNode other) {
+                return one.symbol != other.symbol;
+            }
+
+            public override bool Equals(object obj) {
+                return base.Equals(obj);
+            }
+
+            public override int GetHashCode() {
+                return base.GetHashCode();
             }
         }
 
@@ -48,6 +76,18 @@ namespace Shape {
             }
         }
 
+        private void RemoveGraph(ShapeGraph other) {
+            // TODO
+        }
+
+        private void RemoveNode(SGNode other) {
+            // Remove it from the set
+            this.nodes.Remove(other);
+
+            // Disconnect the edges
+            other.Remove();
+        }
+
         public ShapeGraph() {
             this.nodes = new HashSet<SGNode>();
         }
@@ -55,7 +95,13 @@ namespace Shape {
         public ShapeGraph(IShape shape) {
             this.nodes = new HashSet<SGNode>();
 
-            this.AddGraph(shape.Graph);
+            this.nodes.Add(new SGNode(shape));
+        }
+
+        public ShapeGraph(Type symbol) {
+            this.nodes = new HashSet<SGNode>();
+
+            this.nodes.Add(new SGNode(symbol));
         }
 
         public ShapeGraph(List<IShape> shapes) {
@@ -64,6 +110,54 @@ namespace Shape {
             foreach (IShape shape in shapes) {
                 this.AddGraph(shape.Graph);
             }
+        }
+
+        private List<(SGNode, Type)> GetNonTerminals(HashSet<(ShapeGraph, Type)> prototypes) {
+            List<(SGNode, Type)> o = new List<(SGNode, Type)>();
+            foreach (SGNode node in this.nodes) {
+                foreach ((ShapeGraph, Type) prototype in prototypes) {
+                    // NOTE: This only works with one node!
+                    foreach (SGNode protonode in prototype.Item1.nodes) {
+                        if (node == protonode)
+                            o.Add((node, prototype.Item2));
+                    }
+                }
+            }
+
+            return o;
+        }
+
+        public void Interpret(HashSet<(ShapeGraph, Type)> prototypes) {
+            // Get all the non-terminals
+            List<(SGNode, Type)> nonterminals = this.GetNonTerminals(prototypes);
+
+            // Take a random
+            Random rnd = new Random();
+            int r = rnd.Next(nonterminals.Count);
+            (SGNode, Type) randomNonTerminal = nonterminals[r];
+
+            // Get the shape
+            IShape shape = randomNonTerminal.Item1.Shape;
+
+            // Apply a rule on it
+            List<IShape> newShapes = shape.NextShapes();
+
+            // Remove the original node from the graph
+            this.RemoveNode(randomNonTerminal.Item1);
+
+            // Add all the new shapes to the graph
+            foreach (IShape ns in newShapes) {
+                this.AddGraph(ns.Graph);
+            }
+        }
+
+        public List<IShape> GetShapes() {
+            List<IShape> shapes = new List<IShape>();
+            foreach (SGNode node in this.nodes) {
+                shapes.Add(node.Shape);
+            }
+
+            return shapes;
         }
     }
 }
