@@ -11,6 +11,8 @@ namespace Shape {
 
             public IShape Shape {get {return this.shape;}}
 
+            public HashSet<(SGNode, Attributes)> Connections {get {return this.connections;}}
+
             public SGNode(IShape shape) {
                 this.shape = shape;
                 this.symbol = shape.Symbol;
@@ -53,17 +55,16 @@ namespace Shape {
 
         protected HashSet<SGNode> nodes;
 
-        private void AddGraph(ShapeGraph other) {
-            if (other == null)
-                return;
-
-            // Get the nodes
+        private HashSet<SGNode> AddGraph(ShapeGraph other, HashSet<SGNode> edges) {
             HashSet<SGNode> shapeNodes = other.nodes;
+            
+            if (other == null)
+                return shapeNodes;
 
             // For each node in the other shape graph, check
             // if there are connections to this shape graph
             foreach (SGNode otherNode in shapeNodes) {
-                foreach (SGNode ownNode in this.nodes) {
+                foreach (SGNode ownNode in edges) {
                     // NOTE: LineOverlap is valid for 2D only!
                     if (otherNode.Shape.LineOverlap(ownNode.Shape))
                         otherNode.Connect(ownNode, null);
@@ -74,6 +75,12 @@ namespace Shape {
             foreach (SGNode otherNode in shapeNodes) {
                 this.nodes.Add(otherNode);
             }
+
+            return shapeNodes;
+        }
+
+        private HashSet<SGNode> AddGraph(ShapeGraph sg) {
+            return this.AddGraph(sg, this.nodes);
         }
 
         private void RemoveGraph(ShapeGraph other) {
@@ -127,7 +134,7 @@ namespace Shape {
             return o;
         }
 
-        public void Interpret(HashSet<(ShapeGraph, Type)> prototypes) {
+        public void Interpret(HashSet<(ShapeGraph, Type)> prototypes, ControlGrammar cg) {
             // Get all the non-terminals
             List<(SGNode, Type)> nonterminals = this.GetNonTerminals(prototypes);
 
@@ -142,13 +149,42 @@ namespace Shape {
             // Apply a rule on it
             List<IShape> newShapes = shape.NextShapes();
 
+            // Get the edges of that node
+            HashSet<SGNode> removedEdges = new HashSet<SGNode>();
+            foreach ((SGNode node, Attributes a) c in randomNonTerminal.Item1.Connections) {
+                removedEdges.Add(c.node);
+            }
+
             // Remove the original node from the graph
             this.RemoveNode(randomNonTerminal.Item1);
 
+            // We need to get all the new nodes
+            ShapeGraph splitGraph = new ShapeGraph();
+
             // Add all the new shapes to the graph
             foreach (IShape ns in newShapes) {
-                this.AddGraph(ns.Graph);
+                splitGraph.AddGraph(ns.Graph);
             }
+
+            // Control grammar
+            if (shape.Control != "") {
+                HashSet<((uint, uint), string, float, string)> attributeOverwrite = cg.Interpret(shape.Control);
+
+                Dictionary<(uint, uint), SGNode> nodePlacement = new Dictionary<(uint, uint), SGNode>();
+                foreach (SGNode node in splitGraph.nodes) {
+                    nodePlacement.Add(node.Shape.Locator, node);
+                }
+
+                foreach (((uint x, uint y) loc, string attr, float val, string next) in attributeOverwrite) {
+                    SGNode node = nodePlacement[loc];
+                    // TODO
+                }
+            }
+
+            // TODO: WFC
+
+            // Merge the split graph with this graph
+            this.AddGraph(splitGraph, removedEdges);
         }
 
         public List<IShape> GetShapes() {

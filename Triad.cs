@@ -10,11 +10,14 @@ namespace Shape {
         private Rules rules;
         private Random rnd;
         private ShapeGraph shapeGraph;
-        
+        private (uint x, uint y) locator;
+        private string control = "";
+
         public Type Symbol {get { return typeof(Triad);}}
         public Attributes Attributes {get {return this.attributes;}}
-
         public ShapeGraph Graph {get {return this.shapeGraph;}}
+        public (uint, uint) Locator {get {return this.locator;}}
+        public string Control {get {return this.control;} set {this.control = value;}}
 
         public static ShapeGraph Prototype() {
             return new ShapeGraph(typeof(Triad));
@@ -37,6 +40,7 @@ namespace Shape {
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = new Attributes();
+            this.locator = (~0u, ~0u);
             this.InitializeVertices(vertices);
         }
 
@@ -44,6 +48,15 @@ namespace Shape {
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = attributes;
+            this.locator = (~0u, ~0u);
+            this.InitializeVertices(vertices);
+        }
+
+        public Triad(Rules rules, Attributes attributes, (uint, uint) locator, (Vertex v1, Vertex v2, Vertex v3) vertices) {
+            this.rules = rules;
+            this.rnd = new Random();
+            this.attributes = attributes;
+            this.locator = locator;
             this.InitializeVertices(vertices);
         }
 

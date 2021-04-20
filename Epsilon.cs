@@ -5,9 +5,9 @@ namespace Shape {
     public class Epsilon : IShape {
         public Type Symbol {get { return typeof(Epsilon);}}
         public Attributes Attributes {get {return null;}}
-
         public ShapeGraph Graph {get {return new ShapeGraph();}}
-
+        public (uint, uint) Locator {get {return (0u, 0u);}}
+        public string Control {get {return "";} set {}}
         public static ShapeGraph Prototype() {
             return new ShapeGraph();
         }

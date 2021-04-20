@@ -6,6 +6,8 @@ namespace Shape {
         Type Symbol {get;}
         Attributes Attributes {get;}
         ShapeGraph Graph {get;}
+        (uint, uint) Locator {get;}
+        string Control {get; set;}
         static ShapeGraph Prototype() {
             return null;
         }

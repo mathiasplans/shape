@@ -20,7 +20,7 @@ public class Interpreter2 {
 
         // Find all the subgraphs of the shape graph that are prototypes
         for (int i = 0; i < max; ++i) {
-            sg.Interpret(prototypes);
+            sg.Interpret(prototypes, new ControlGrammar());
         }
 
         return sg.GetShapes();
