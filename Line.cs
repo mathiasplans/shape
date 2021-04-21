@@ -17,6 +17,30 @@ public class Line {
         this.length = this.vector.Magnitude();
     }
 
+    public Vertex Bisect(float x) {
+        return this.p1 * x + this.p2 * (1f - x);
+    }
+
+    public Vertex[] Sections(int n) {
+        float len = 1f / (float) (n + 1);
+        Vertex[] sections = new Vertex[n];
+
+        for (int i = 0; i < n; ++i) {
+            sections[i] = this.Bisect(len * (i + 1));
+        }
+
+        return sections;
+    }
+
+    public Vertex[] Sections(params float[] x) {
+        Vertex[] sections = new Vertex[x.Length];
+        for (int i = 0; i < x.Length; ++i) {
+            sections[i] = this.Bisect(x[i]);
+        }
+
+        return sections;
+    }
+
     private static bool LengthMatch(Line l1, Line l2, Line l3) {
         float combinedLength = l1.Length + l2.Length;
         return (combinedLength + Line.error) > l3.Length && (combinedLength - Line.error) < l3.Length;

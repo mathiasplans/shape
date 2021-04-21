@@ -17,6 +17,10 @@ public class Attributes {
         this.Add(kvps);
     }
 
+    public Attributes Copy() {
+        return new Attributes(this);
+    }
+
     public void Add(params (string, IAttribute)[] kvps) {
         foreach ((string name, IAttribute attr) kvp in kvps) {
             this.Add(kvp.name, kvp.attr);
@@ -41,6 +45,16 @@ public class Attributes {
             throw new Exception($"This attribute does not exist: {name}");
 
         this.attributes[name] = attribute;
+    }
+
+    public void Set(string name, IAttribute attribute) {
+        if (!this.attributes.ContainsKey(name)) {
+            this.attributes.Add(name, attribute);
+        }
+
+        else {
+            this.attributes[name] = attribute;
+        }
     }
 
     public IAttribute Get(string name) {

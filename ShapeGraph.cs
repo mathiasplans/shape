@@ -171,13 +171,42 @@ namespace Shape {
                 HashSet<((uint, uint), string, float, string)> attributeOverwrite = cg.Interpret(shape.Control);
 
                 Dictionary<(uint, uint), SGNode> nodePlacement = new Dictionary<(uint, uint), SGNode>();
+                List<(uint, uint)> locators = new List<(uint, uint)>();
                 foreach (SGNode node in splitGraph.nodes) {
                     nodePlacement.Add(node.Shape.Locator, node);
+                    locators.Add(node.Shape.Locator);
                 }
 
+                HashSet<(uint, uint)> handledLocators = new HashSet<(uint, uint)>();
+
+                // Console.WriteLine("Control");
                 foreach (((uint x, uint y) loc, string attr, float val, string next) in attributeOverwrite) {
-                    SGNode node = nodePlacement[loc];
-                    // TODO
+                    // Get all the locators meant by the locator
+                    List<(uint, uint)> reqLocators = new List<(uint, uint)>();
+                    foreach ((uint x, uint y) all in locators) {
+                        if ((loc.x == all.x || loc.x == ~0u) && (loc.y == all.y || loc.y == ~0u)) {
+                            if (loc.x == all.x && loc.y == all.y)
+                                reqLocators.Add(all);
+
+                            else if (!handledLocators.Contains(all))
+                                reqLocators.Add(all);
+
+                            handledLocators.Add(all);
+                        }
+                    }
+
+                    foreach ((uint x, uint y) all in reqLocators) {
+                        SGNode node = nodePlacement[all];
+                        
+                        // Set the attribute
+                        float before = node.Shape.Attributes.Get(attr).Start;
+                        node.Shape.Attributes.Set(attr, new ScalarAttribute(val));
+                        float after = node.Shape.Attributes.Get(attr).Start;
+
+                        // Add the control symbol
+                        node.Shape.Control = next;
+                        // Console.WriteLine($"{node.GetHashCode()} {all.x} {all.y}: {before} -> {val} ({after}) {next}");
+                    }
                 }
             }
 

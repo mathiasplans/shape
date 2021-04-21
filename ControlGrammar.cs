@@ -34,6 +34,10 @@ public class ControlGrammar {
 
         this.terminals[lhs].Add(rhs);
     }
+    
+    public void AddRule(string lhs, ((uint, uint), string, float, string) rhs) {
+        this.AddRule(lhs, new ((uint, uint), string, float, string)[] {rhs});
+    }
 
     public void AddRule(string lhs, List<((uint, uint), string, float, string)[]> rhs) {
         foreach (var r in rhs) {
