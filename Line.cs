@@ -21,6 +21,10 @@ public class Line {
         return this.p1 * x + this.p2 * (1f - x);
     }
 
+    public Vertex Bisect() {
+        return this.Bisect(0.5f);
+    }
+
     public Vertex[] Sections(int n) {
         float len = 1f / (float) (n + 1);
         Vertex[] sections = new Vertex[n];

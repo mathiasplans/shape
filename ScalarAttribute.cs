@@ -11,6 +11,7 @@ public class ScalarAttribute : IAttribute {
     public float End {get {return this.scalar;}}
 
     public bool Matches(IAttribute other) {
+        // Console.WriteLine($"{other.End} >= {this.scalar} >= {other.Start}");
         return this.scalar <= other.End && this.scalar >= other.Start;
     }
 }

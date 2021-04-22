@@ -3,7 +3,7 @@ using System;
 using Shape;
 
 public class Interpreter2 {
-    public static List<IShape> Interpret(IShape start, Rules rules, ControlGrammar cg, uint max) {
+    public static List<IShape> Interpret(IShape start, Rules rules, Control control, uint max) {
         ShapeGraph sg = new ShapeGraph(start);
 
         // Get all the LHSes, so we can search for them in the graph
@@ -20,7 +20,7 @@ public class Interpreter2 {
 
         // Find all the subgraphs of the shape graph that are prototypes
         for (int i = 0; i < max; ++i) {
-            sg.Interpret(prototypes, cg);
+            sg.Interpret(prototypes, control);
         }
 
         return sg.GetShapes();

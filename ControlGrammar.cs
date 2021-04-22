@@ -4,12 +4,12 @@ using System;
 
 public class ControlGrammar {
     Dictionary<string, List<string[]>> rules;
-    Dictionary<string, List<((uint, uint), string, float, string)[]>> terminals;
+    Dictionary<string, List<ControlAssignment[]>> terminals;
     Random rnd;
 
     public ControlGrammar() {
         this.rules = new Dictionary<string, List<string[]>>();
-        this.terminals = new Dictionary<string, List<((uint, uint), string, float, string)[]>>();
+        this.terminals = new Dictionary<string, List<ControlAssignment[]>>();
         this.rnd = new Random();
     }
 
@@ -27,34 +27,34 @@ public class ControlGrammar {
         }
     }
 
-    public void AddRule(string lhs, ((uint, uint), string, float, string)[] rhs) {
+    public void AddRule(string lhs, ControlAssignment[] rhs) {
         if (!this.terminals.ContainsKey(lhs)) {
-            this.terminals.Add(lhs, new List<((uint, uint), string, float, string)[]>());
+            this.terminals.Add(lhs, new List<ControlAssignment[]>());
         }
 
         this.terminals[lhs].Add(rhs);
     }
-    
-    public void AddRule(string lhs, ((uint, uint), string, float, string) rhs) {
-        this.AddRule(lhs, new ((uint, uint), string, float, string)[] {rhs});
+
+    public void AddRule(string lhs, ControlAssignment rhs) {
+        this.AddRule(lhs, new ControlAssignment[] {rhs});
     }
 
-    public void AddRule(string lhs, List<((uint, uint), string, float, string)[]> rhs) {
+    public void AddRule(string lhs, List<ControlAssignment[]> rhs) {
         foreach (var r in rhs) {
             this.AddRule(lhs, r);
         }
     }
 
-    public HashSet<((uint, uint), string, float, string)> Interpret(string start) {
+    public HashSet<ControlAssignment> Interpret(string start) {
         if (start == "") {
-            return new HashSet<((uint, uint), string, float, string)>();
+            return new HashSet<ControlAssignment>();
         }
 
         int rand = 0;
         if (this.terminals.ContainsKey(start)) {
             rand = this.rnd.Next(this.terminals[start].Count);
-            ((uint, uint), string, float, string)[] aslist = this.terminals[start][rand];
-            return new HashSet<((uint, uint), string, float, string)>(aslist);
+            ControlAssignment[] aslist = this.terminals[start][rand];
+            return new HashSet<ControlAssignment>(aslist);
         }
 
         if (!this.rules.ContainsKey(start))
@@ -62,7 +62,7 @@ public class ControlGrammar {
 
         rand = this.rnd.Next(this.rules[start].Count);
         string[] derivation = this.rules[start][rand];
-        HashSet<((uint, uint), string, float, string)> r = new HashSet<((uint, uint), string, float, string)>();
+        HashSet<ControlAssignment> r = new HashSet<ControlAssignment>();
         foreach (string symbol in derivation) {
             r.UnionWith(this.Interpret(symbol));
         }
