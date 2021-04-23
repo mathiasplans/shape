@@ -12,7 +12,7 @@ public class MainClass {
     }
 
     private static List<IShape> GetShapes(int min, int max) {
-        return ExampleGrammar2.Run(min, max, 20);
+        return ExampleGrammar3.Run(min, max, 20);
     }
 
     public static Graphics GetGraphics(Bitmap bmp) {

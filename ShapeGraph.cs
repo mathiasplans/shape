@@ -36,10 +36,22 @@ namespace Shape {
             }
 
             public static bool operator ==(Node one, Node other) {
+                if (one is null)
+                    return other is null;
+
+                if (other is null)
+                    return false;
+
                 return one.symbol == other.symbol;
             }
 
             public static bool operator !=(Node one, Node other) {
+                if (one is null)
+                    return !(other is null);
+
+                if (other is null)
+                    return true;
+
                 return one.symbol != other.symbol;
             }
 
@@ -53,6 +65,7 @@ namespace Shape {
         }
 
         protected HashSet<Node> nodes;
+        protected Dictionary<IShape, Node> shapeMap;
 
         public HashSet<Node>.Enumerator GetEnumerator() {
             return this.nodes.GetEnumerator();
@@ -77,6 +90,7 @@ namespace Shape {
             // Then add the nodes in the other graph to own graph
             foreach (Node otherNode in shapeNodes) {
                 this.nodes.Add(otherNode);
+                this.shapeMap.Add(otherNode.Shape, otherNode);
             }
 
             return shapeNodes;
@@ -93,6 +107,7 @@ namespace Shape {
         private void RemoveNode(Node other) {
             // Remove it from the set
             this.nodes.Remove(other);
+            this.shapeMap.Remove(other.Shape);
 
             // Disconnect the edges
             other.Remove();
@@ -100,22 +115,29 @@ namespace Shape {
 
         public ShapeGraph() {
             this.nodes = new HashSet<Node>();
+            this.shapeMap = new Dictionary<IShape, Node>();
         }
 
         public ShapeGraph(IShape shape) {
             this.nodes = new HashSet<Node>();
+            this.shapeMap = new Dictionary<IShape, Node>();
 
-            this.nodes.Add(new Node(shape));
+            Node newNode = new Node(shape);
+            this.nodes.Add(newNode);
+            this.shapeMap.Add(shape, newNode);
         }
 
         public ShapeGraph(Type symbol) {
             this.nodes = new HashSet<Node>();
+            this.shapeMap = new Dictionary<IShape, Node>();
 
-            this.nodes.Add(new Node(symbol));
+            Node newNode = new Node(symbol);
+            this.nodes.Add(newNode);
         }
 
         public ShapeGraph(List<IShape> shapes) {
             this.nodes = new HashSet<Node>();
+            this.shapeMap = new Dictionary<IShape, Node>();
 
             foreach (IShape shape in shapes) {
                 this.AddGraph(shape.Graph);
@@ -161,14 +183,35 @@ namespace Shape {
             if (newShapes.Count == 0)
                 return;
 
+            // Get the virtual connection
+            IShape vcshape = null;
+            Node vcnode = null;
+            if (shape.VC != null) {
+                vcshape = shape.VC.Other(shape);
+                vcnode = this.shapeMap[vcshape];
+            }
+
             // Get the edges of that node
             HashSet<Node> removedEdges = new HashSet<Node>();
             foreach ((Node node, Attributes a) c in randomNonTerminal.Item1.Connections) {
-                removedEdges.Add(c.node);
+                if (c.node != vcnode)
+                    removedEdges.Add(c.node);
+            }
+
+            // Also add virtual connection edges
+            if (vcnode != null) {
+                foreach ((Node node, Attributes a) c in vcnode.Connections) {
+                    if (c.node != randomNonTerminal.Item1)
+                        removedEdges.Add(c.node);
+                }
             }
 
             // Remove the original node from the graph
             this.RemoveNode(randomNonTerminal.Item1);
+
+            if (vcnode != null) {
+                this.RemoveNode(vcnode);
+            }
 
             // We need to get all the new nodes
             ShapeGraph splitGraph = new ShapeGraph();
@@ -178,7 +221,8 @@ namespace Shape {
                 splitGraph.AddGraph(ns.Graph);
             }
 
-            control.Inerpret(shape, splitGraph);
+            if (vcnode == null)
+                control.Inerpret(shape, splitGraph);
 
             // Merge the split graph with this graph
             this.AddGraph(splitGraph, removedEdges);

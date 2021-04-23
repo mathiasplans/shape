@@ -8,12 +8,14 @@ namespace Shape {
         ShapeGraph Graph {get;}
         (uint, uint) Locator {get;}
         string Control {get; set;}
+        VirtualConnection VC {get; set;}
         static ShapeGraph Prototype() {
             return null;
         }
         List<IShape> NextShapes();
         List<Vertex> GetVertices();
         List<Line> GetLines();
+        void SetVertices(List<Vertex> newVerts);
 
         bool LineOverlap(IShape other) {
             foreach (Line line1 in this.GetLines()) {
