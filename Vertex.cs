@@ -60,4 +60,8 @@ public class Vertex {
     public float Magnitude() {
         return (float) Math.Sqrt(this.x * this.x + this.y * this.y);
     }
+
+    public Vertex Copy() {
+        return new Vertex(this.x, this.y);
+    }
 }

@@ -26,10 +26,27 @@ namespace Shape {
         public (uint, uint) Locator {get {return this.locator;}}
         public string Control {get {return this.control;} set {this.control = value;}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
+        public Vertex Center {get {
+            Vertex c = new Vertex(0f, 0f);
+            foreach (Vertex vert in this.v) {
+                c += vert;
+            }
 
+            c /= 3f;
+
+            return c;
+        }}
 
         public static ShapeGraph Prototype() {
             return new ShapeGraph(typeof(Triad));
+        }
+
+        public static IShape Etalon(Rules rules, float width) {
+            Vertex v1 = new Vertex(0, width);
+            Vertex v2 = new Vertex(width / 2, 0);
+            Vertex v3 = new Vertex(width, width);
+
+            return new Triad(rules, (v1, v2, v3));
         }
 
         private void CalculateLines() {
@@ -98,6 +115,14 @@ namespace Shape {
             }
 
             this.CalculateLines();
+        }
+
+        public IShape Copy() {
+            return new Triad(this.rules, this.attributes.Copy(), this.locator, (this.v1.Copy(), this.v2.Copy(), this.v3.Copy()));
+        }
+
+        public override string ToString() {
+            return "T";
         }
     }
 }

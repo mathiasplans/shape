@@ -30,10 +30,28 @@ namespace Shape {
         public (uint, uint) Locator {get {return this.locator;}}
         public string Control {get {return this.control;} set {this.control = value;}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
+        public Vertex Center {get {
+            Vertex c = new Vertex(0f, 0f);
+            foreach (Vertex vert in this.v) {
+                c += vert;
+            }
 
+            c /= 4f;
+
+            return c;
+        }}
 
         public static ShapeGraph Prototype() {
             return new ShapeGraph(typeof(Quad));
+        }
+
+        public static IShape Etalon(Rules rules, float width) {
+            Vertex v1 = new Vertex(0, 0);
+            Vertex v2 = new Vertex(width, 0);
+            Vertex v3 = new Vertex(width, width);
+            Vertex v4 = new Vertex(0, width);
+
+            return new Quad(rules, (v1, v2, v3, v4));
         }
 
         private void CalculateLines() {
@@ -103,6 +121,14 @@ namespace Shape {
             }
 
             this.CalculateLines();
+        }
+
+        public IShape Copy() {
+            return new Quad(this.rules, this.attributes.Copy(), this.locator, (this.v1.Copy(), this.v2.Copy(), this.v3.Copy(), this.v4.Copy()));
+        }
+
+        public override string ToString() {
+            return "Q";
         }
     }
 }

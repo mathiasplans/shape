@@ -83,4 +83,22 @@ public class Rules {
 
         return o;
     }
+
+    public List<(IShape, List<IShape>)> RuleExamples(float width) {
+        List<(IShape, List<IShape>)> productions = new List<(IShape, List<IShape>)>();
+        foreach (Type key in this.rules.Keys) {
+            if (key == typeof(void))
+                continue;
+
+            // Get the etalon shape
+            IShape etalon = (IShape) key.GetMethod("Etalon").Invoke(null, new object[]{this, width});
+
+            // Use all the rules on the etalon and record them
+            foreach ((Func<IShape, List<IShape>> del, Attributes a) in this.rules[key]) {
+                productions.Add((etalon, del(etalon)));
+            }
+        }
+
+        return productions;
+    }
 }

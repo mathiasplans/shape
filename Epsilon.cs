@@ -10,8 +10,13 @@ namespace Shape {
         public (uint, uint) Locator {get {return (0u, 0u);}}
         public string Control {get {return "";} set {}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
+        public Vertex Center {get {return new Vertex(0f, 0f);}}
         public static ShapeGraph Prototype() {
             return new ShapeGraph();
+        }
+
+        public static IShape Etalon(Rules rules, float width) {
+            return new Epsilon();
         }
 
         public List<IShape> NextShapes() {
@@ -28,6 +33,18 @@ namespace Shape {
 
         public void SetVertices(List<Vertex> newVerts) {
 
+        }
+
+        public void Transform(float[,] transformation) {
+
+        }
+
+        public override string ToString() {
+            return "ε";
+        }
+
+        public IShape Copy() {
+            return new Epsilon();
         }
     }
 }
