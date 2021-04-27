@@ -47,7 +47,7 @@ public class Line {
 
     private static bool LengthMatch(Line l1, Line l2, Line l3) {
         float combinedLength = l1.Length + l2.Length;
-        return (combinedLength + Line.error) > l3.Length && (combinedLength - Line.error) < l3.Length;
+        return ((combinedLength + Line.error) > l3.Length) && ((combinedLength - Line.error) < l3.Length);
     }
 
     public bool Coincident(Vertex p3) {
@@ -74,11 +74,18 @@ public class Line {
         if (l2.Length > largest.Length)
             largest = l2;
 
-        if (t && LengthMatch(this, other, largest))
-            return false;
-
         // See if all the points of both lines are coincidental with the large line
-        return largest.Coincident(this.p1) && largest.Coincident(this.p2) && largest.Coincident(other.p1) && largest.Coincident(other.p2);
+        bool coincidentRule = largest.Coincident(this.p1) && largest.Coincident(this.p2) && largest.Coincident(other.p1) && largest.Coincident(other.p2);
+
+        // See if the length of the largest doesn't exceed the combined length of the two lines
+        bool lengthRule = this.Length + other.Length >= largest.Length - Line.error;
+
+        // If true collinear is checked, the lengths should not match
+        bool trueRule = true;
+        if (t)
+            trueRule = !LengthMatch(this, other, largest);
+
+        return coincidentRule && lengthRule && trueRule;
     }
 
     public bool Colinear(Line other) {
@@ -87,5 +94,9 @@ public class Line {
 
     public bool TrueColinear(Line other) {
         return this.Colinear(other, true);
+    }
+
+    public override string ToString() {
+        return $"{this.p1} - {this.p2}";
     }
 }

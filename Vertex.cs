@@ -54,6 +54,9 @@ public class Vertex {
 
     public static implicit operator Vertex(Point p) => new Vertex(p.X, p.Y);
     public static implicit operator Point(Vertex v) => new Point((int)v.x, (int)v.y);
+    public static implicit operator Vertex(PointF p) => new Vertex(p.X, p.Y);
+
+    public static implicit operator PointF(Vertex v) => new PointF(v.x, v.y);
     public static implicit operator Vertex((float, float) cord) => new Vertex(cord.Item1, cord.Item2);
     public static implicit operator (float, float)(Vertex v) => (v.x, v.y);
 
@@ -63,5 +66,9 @@ public class Vertex {
 
     public Vertex Copy() {
         return new Vertex(this.x, this.y);
+    }
+
+    public override string ToString() {
+        return $"({this.x}, {this.y})";
     }
 }

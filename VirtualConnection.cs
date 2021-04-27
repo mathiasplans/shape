@@ -9,19 +9,25 @@ namespace Shape {
         private Vertex center;
         private Dictionary<int, int> xsymmetry;
         private Dictionary<int, int> ysymmetry;
+        private bool persistant = false;
 
-        private VirtualConnection(IShape shape1, IShape shape2, Vertex center, Dictionary<int, int> xsymmetry, Dictionary<int, int> ysymmetry) {
+        public bool Persistant {get {return this.persistant;}}
+
+        private VirtualConnection(IShape shape1, IShape shape2, Vertex center, Dictionary<int, int> xsymmetry, Dictionary<int, int> ysymmetry, bool persistant) {
             this.shape1 = shape1;
             this.shape2 = shape2;
             this.center = center;
 
             this.xsymmetry = xsymmetry;
             this.ysymmetry = ysymmetry;
+
+            this.persistant = persistant;
         }
 
-        public static void Connect(IShape shape1, IShape shape2, bool symx, bool symy) {
-            if (shape1.VC != null || shape2.VC != null)
+        public static void Connect(IShape shape1, IShape shape2, bool symx, bool symy, bool persistant) {
+            if (shape1.VC != null || shape2.VC != null) {
                 throw new Exception("Shape already has a virtual connection!");
+            }
 
             if (shape1.Symbol != shape2.Symbol)
                 throw new Exception($"Shapes with different symbold can not be virtually connected: {shape1.Symbol}, {shape2.Symbol}");
@@ -127,7 +133,7 @@ namespace Shape {
                 }
             }
 
-            VirtualConnection vc = new VirtualConnection(shape1, shape2, center, xmap, ymap);
+            VirtualConnection vc = new VirtualConnection(shape1, shape2, center, xmap, ymap, persistant);
 
             shape1.VC = vc;
             shape2.VC = vc;

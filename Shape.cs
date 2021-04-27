@@ -10,10 +10,10 @@ namespace Shape {
         string Control {get; set;}
         VirtualConnection VC {get; set;}
         Vertex Center {get;}
+        string Name {get; set;}
         static ShapeGraph Prototype() {
             return null;
         }
-
         static IShape Etalon(Rules rules, float width) {
             return null;
         }

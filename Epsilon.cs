@@ -4,6 +4,7 @@ using System;
 namespace Shape {
     public class Epsilon : IShape {
         private VirtualConnection vc;
+        private string name = "Epsilon";
         public Type Symbol {get { return typeof(Epsilon);}}
         public Attributes Attributes {get {return null;}}
         public ShapeGraph Graph {get {return new ShapeGraph();}}
@@ -11,6 +12,7 @@ namespace Shape {
         public string Control {get {return "";} set {}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
         public Vertex Center {get {return new Vertex(0f, 0f);}}
+        public string Name {get {return this.name;} set {this.name = value;}}
         public static ShapeGraph Prototype() {
             return new ShapeGraph();
         }

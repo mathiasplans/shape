@@ -54,9 +54,9 @@ public class ExampleGrammar2 {
                 Attributes na = quad.Attributes.Copy();
                 na.Set("Wave", new ScalarAttribute(3f));
 
-                Quad q1 = new Quad(rules, na.Copy(), (quad.v1, v1[0], v2[1], quad.v4));
-                Quad q2 = new Quad(rules, na.Copy(), (v1[0], v1[1], v2[0], v1[1]));
-                Quad q3 = new Quad(rules, na.Copy(), (v1[1], quad.v2, quad.v3, v2[0]));
+                Quad q1 = new Quad(rules, na.Copy(), (quad.v1, v1[1], v2[0], quad.v4));
+                Quad q2 = new Quad(rules, na.Copy(), (v1[1], v1[0], v2[1], v2[0]));
+                Quad q3 = new Quad(rules, na.Copy(), (v1[0], quad.v2, quad.v3, v2[1]));
 
                 return new List<IShape> {q1, q2, q3};
             }
@@ -144,6 +144,6 @@ public class ExampleGrammar2 {
         // List<IShape> shapes = Interpreter.Interpret(start, 10);
         List<IShape> shapes = Interpreter2.Interpret(start, rules, control, times);
 
-        return (shapes, null);
+        return (shapes, rules.RuleExamples(100f));
     }
 }

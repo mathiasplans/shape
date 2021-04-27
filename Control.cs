@@ -4,7 +4,7 @@ using System;
 using Shape;
 
 using ForwardCarry = System.Collections.Generic.Dictionary<Shape.ShapeGraph.Node, System.Collections.Generic.HashSet<string>>;
-using NodeMap = System.Collections.Generic.Dictionary<(uint, uint), Shape.ShapeGraph.Node>;
+using NodeMap = System.Collections.Generic.Dictionary<(uint, uint), System.Collections.Generic.List<Shape.ShapeGraph.Node>>;
 
 public class Control {
     private ControlGrammar cg;
@@ -47,7 +47,7 @@ public class Control {
             }
 
             foreach ((uint x, uint y) all in reqLocators) {
-                ShapeGraph.Node node = nodePlacement[all];
+                ShapeGraph.Node node = nodePlacement[all][0];
 
                 // If the assignment is nonterminal, it will be used by
                 // some following steps in the control pipeline
@@ -68,12 +68,14 @@ public class Control {
                 }
                 
                 else {
-                    // Set the attribute
-                    if (ca.Attr != "")
-                        node.Shape.Attributes.Set(ca.Attr, new ScalarAttribute(ca.Value));
+                    foreach (ShapeGraph.Node n in nodePlacement[all]) {
+                        // Set the attribute
+                        if (ca.Attr != "")
+                            n.Shape.Attributes.Set(ca.Attr, new ScalarAttribute(ca.Value));
 
-                    // Add the control symbol
-                    node.Shape.Control = ca.Next;
+                        // Add the control symbol
+                        n.Shape.Control = ca.Next;
+                    }
                 }
             }
         }
@@ -81,7 +83,7 @@ public class Control {
         return (forwardCarry, activationSymbol);
     }
 
-    private (ForwardCarry, string) DoGrammar(IShape shape, ShapeGraph splitGraph, NodeMap nodePlacement) {
+    private (ForwardCarry, string) DoGrammar(IShape shape, NodeMap nodePlacement) {
         // Control grammar
         if (shape.Control != "") {
             HashSet<ControlAssignment> attributeOverwrite = cg.Interpret(shape.Control);
@@ -101,20 +103,21 @@ public class Control {
         return this.Assign(assignments, nodePlacement);
     }
 
-    public void Inerpret(IShape shape, ShapeGraph splitGraph) {
+    public void Interpret(IShape shape, params ShapeGraph[] splitGraph) {
         NodeMap nodePlacement = new NodeMap();
-        foreach (ShapeGraph.Node node in splitGraph) {
-            // There are duplicate locations
-            if (nodePlacement.ContainsKey(node.Shape.Locator))
-                return;
+        foreach (ShapeGraph sg in splitGraph) {
+            foreach (ShapeGraph.Node node in sg) {
+                // There are duplicate locations
+                if (!nodePlacement.ContainsKey(node.Shape.Locator))
+                    nodePlacement.Add(node.Shape.Locator, new List<ShapeGraph.Node>());
 
-            nodePlacement.Add(node.Shape.Locator, node);
+                nodePlacement[node.Shape.Locator].Add(node);
+            }
         }
 
         (ForwardCarry carry, string act) state;
-        state = this.DoGrammar(shape, splitGraph, nodePlacement);
-        state = this.DoWFC(state, shape, splitGraph, nodePlacement);
+        state = this.DoGrammar(shape, nodePlacement);
+        state = this.DoWFC(state, shape, splitGraph[0], nodePlacement);
         // TODO: Can add more steps into this pipeline
     }
-
 }

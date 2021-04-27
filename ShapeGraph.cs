@@ -71,6 +71,8 @@ namespace Shape {
             return this.nodes.GetEnumerator();
         }
 
+        public int Count {get {return this.nodes.Count;}}
+
         private HashSet<Node> AddGraph(ShapeGraph other, HashSet<Node> edges) {
             HashSet<Node> shapeNodes = other.nodes;
             
@@ -82,8 +84,9 @@ namespace Shape {
             foreach (Node otherNode in shapeNodes) {
                 foreach (Node ownNode in edges) {
                     // NOTE: LineOverlap is valid for 2D only!
-                    if (otherNode.Shape.LineOverlap(ownNode.Shape))
+                    if (otherNode.Shape.LineOverlap(ownNode.Shape)) {
                         otherNode.Connect(ownNode, null);
+                    }
                 } 
             }
 
@@ -186,9 +189,11 @@ namespace Shape {
             // Get the virtual connection
             IShape vcshape = null;
             Node vcnode = null;
+            bool vc = false;
             if (shape.VC != null) {
                 vcshape = shape.VC.Other(shape);
                 vcnode = this.shapeMap[vcshape];
+                vc = vcnode != null;
             }
 
             // Get the edges of that node
@@ -199,7 +204,7 @@ namespace Shape {
             }
 
             // Also add virtual connection edges
-            if (vcnode != null) {
+            if (vc) {
                 foreach ((Node node, Attributes a) c in vcnode.Connections) {
                     if (c.node != randomNonTerminal.Item1)
                         removedEdges.Add(c.node);
@@ -209,23 +214,42 @@ namespace Shape {
             // Remove the original node from the graph
             this.RemoveNode(randomNonTerminal.Item1);
 
-            if (vcnode != null) {
+            if (vc) {
                 this.RemoveNode(vcnode);
             }
 
             // We need to get all the new nodes
             ShapeGraph splitGraph = new ShapeGraph();
+            ShapeGraph vcGraph = new ShapeGraph();
 
             // Add all the new shapes to the graph
-            foreach (IShape ns in newShapes) {
-                splitGraph.AddGraph(ns.Graph);
+            if (vc) {
+                int half = newShapes.Count / 2;
+                for (int i = 0; i < half; ++i) {
+                    splitGraph.AddGraph(newShapes[i].Graph);
+                    vcGraph.AddGraph(newShapes[i + half].Graph);
+                }
             }
 
-            if (vcnode == null)
-                control.Inerpret(shape, splitGraph);
+            else {
+                foreach (IShape ns in newShapes) {
+                    splitGraph.AddGraph(ns.Graph);
+                }
+            }
+
+            ShapeGraph mergedGraph = new ShapeGraph();
+            mergedGraph.AddGraph(splitGraph);
+            mergedGraph.AddGraph(vcGraph);
+
+            if (!vc)
+                control.Interpret(shape, mergedGraph);
+
+            else {
+                control.Interpret(shape, splitGraph, vcGraph);
+            }
 
             // Merge the split graph with this graph
-            this.AddGraph(splitGraph, removedEdges);
+            this.AddGraph(mergedGraph, removedEdges);
         }
 
         public List<IShape> GetShapes() {

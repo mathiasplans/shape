@@ -12,7 +12,8 @@ namespace Shape {
         private ShapeGraph shapeGraph;
         private (uint x, uint y) locator;
         private string control = "";
-        private VirtualConnection vc;
+        private VirtualConnection vc = null;
+        private string name = "Quad";
 
         public Vertex v1 {get {return this.v[0];}}
         public Vertex v2 {get {return this.v[1];}}
@@ -40,6 +41,8 @@ namespace Shape {
 
             return c;
         }}
+        public string Name {get {return this.name;} set {this.name = value;}}
+
 
         public static ShapeGraph Prototype() {
             return new ShapeGraph(typeof(Quad));
@@ -101,8 +104,17 @@ namespace Shape {
             if (this.VC != null) {
                 IShape other = this.VC.Other(this);
                 this.VC.Transform(other);
-                newShapes.AddRange(shapeGetter(other));
+                List<IShape> vcShapes = shapeGetter(other);
+
+                if (this.VC.Persistant) {
+                    for (int i = 0; i < newShapes.Count; ++i) {
+                        VirtualConnection.Connect(newShapes[i], vcShapes[i], false, false, true);
+                    }
+                }
+
+                newShapes.AddRange(vcShapes);
             }
+
             
             return newShapes;
         }
