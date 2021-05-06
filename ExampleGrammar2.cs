@@ -139,7 +139,7 @@ public class ExampleGrammar2 {
         control.WFC["WFC1"].AddRule("C", ("Wave", 2f, ""), 1f, "A", "B", "D");
         control.WFC["WFC1"].AddRule("D", ("Wave", 4f, ""), 1f, "B", "C");
 
-        start.Control = "S";
+        start.Control.Add("S");
 
         // List<IShape> shapes = Interpreter.Interpret(start, 10);
         List<IShape> shapes = Interpreter2.Interpret(start, rules, control, times);

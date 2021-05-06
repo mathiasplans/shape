@@ -29,16 +29,25 @@ public class ControlAssignment {
         this.terminal = true;
     }
 
-    public ControlAssignment Copy() {
-        return new ControlAssignment(this.loc, this.attrname, this.value, this.next, this.terminal);
-    }
 
     public ControlAssignment((uint x, uint y) loc, string next) {
         this.loc = loc;
         this.attrname = "";
         this.value = 0f;
         this.next = next;
+        this.terminal = true;
+    }
+
+    public ControlAssignment((uint x, uint y) loc, string wfc, string next) {
+        this.loc = loc;
+        this.attrname = wfc;
+        this.value = 0f;
+        this.next = next;
         this.terminal = false;
+    }
+
+    public ControlAssignment Copy() {
+        return new ControlAssignment(this.loc, this.attrname, this.value, this.next, this.terminal);
     }
 
     public void SetLoc((uint x, uint y) loc) {
@@ -57,6 +66,9 @@ public class ControlAssignment {
         ((uint, uint) loc, string next) a)
         => new ControlAssignment(a.loc, a.next);
 
+    public static implicit operator ControlAssignment(
+        ((uint, uint) loc, string wfc, string next) a)
+        => new ControlAssignment(a.loc, a.wfc, a.next);
     public static implicit operator ControlAssignment(
         string next) 
         => new ControlAssignment((~0u, ~0u), "", 0f, next);

@@ -7,7 +7,7 @@ namespace Shape {
         Attributes Attributes {get;}
         ShapeGraph Graph {get;}
         (uint, uint) Locator {get;}
-        string Control {get; set;}
+        HashSet<string> Control {get;}
         VirtualConnection VC {get; set;}
         Vertex Center {get;}
         string Name {get; set;}

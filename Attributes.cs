@@ -4,6 +4,14 @@ using System;
 public class Attributes {
     private Dictionary<string, IAttribute> attributes;
 
+    public Dictionary<string, IAttribute>.Enumerator GetEnumerator() {
+        return this.attributes.GetEnumerator();
+    }
+
+    public bool ContainsKey(string key) {
+        return this.attributes.ContainsKey(key);
+    }
+
     public Attributes() {
         this.attributes = new Dictionary<string, IAttribute>();
     }

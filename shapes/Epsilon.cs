@@ -5,11 +5,12 @@ namespace Shape {
     public class Epsilon : IShape {
         private VirtualConnection vc;
         private string name = "Epsilon";
+        private HashSet<string> control = new HashSet<string>();
         public Type Symbol {get { return typeof(Epsilon);}}
         public Attributes Attributes {get {return null;}}
         public ShapeGraph Graph {get {return new ShapeGraph();}}
         public (uint, uint) Locator {get {return (0u, 0u);}}
-        public string Control {get {return "";} set {}}
+        public HashSet<string> Control {get {return this.control;}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
         public Vertex Center {get {return new Vertex(0f, 0f);}}
         public string Name {get {return this.name;} set {this.name = value;}}

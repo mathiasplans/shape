@@ -25,9 +25,9 @@ public class Control {
         this.activationSymbols.Add(activationSymbol);
     }
 
-    private (ForwardCarry, string) Assign(ICollection<ControlAssignment> assignments, NodeMap nodePlacement) {
+    private (ForwardCarry, HashSet<string>) Assign(ICollection<ControlAssignment> assignments, NodeMap nodePlacement) {
         ForwardCarry forwardCarry = new ForwardCarry();
-        string activationSymbol = "";
+        HashSet<string> activationSymbols = new HashSet<string>();
         HashSet<((uint, uint), string)> handledLocators = new HashSet<((uint, uint), string)>();
 
         // Console.WriteLine("Control");
@@ -53,8 +53,8 @@ public class Control {
                 // some following steps in the control pipeline
                 if (!ca.IsTerminal) {
                     // If the assignment evokes WFC
-                    if (activationSymbol == "" && this.activationSymbols.Contains(ca.Next)) {
-                        activationSymbol = ca.Next;
+                    if (this.activationSymbols.Contains(ca.Attr)) {
+                        activationSymbols.Add(ca.Attr);
                     }
 
                     // If the assignment sets a WFC constraint
@@ -74,32 +74,41 @@ public class Control {
                             n.Shape.Attributes.Set(ca.Attr, new ScalarAttribute(ca.Value));
 
                         // Add the control symbol
-                        n.Shape.Control = ca.Next;
+                        if (ca.Next != "")
+                            n.Shape.Control.Add(ca.Next);
                     }
                 }
             }
         }
 
-        return (forwardCarry, activationSymbol);
+        return (forwardCarry, activationSymbols);
     }
 
-    private (ForwardCarry, string) DoGrammar(IShape shape, NodeMap nodePlacement) {
+    private (ForwardCarry, HashSet<string>) DoGrammar(IShape shape, NodeMap nodePlacement) {
         // Control grammar
-        if (shape.Control != "") {
-            HashSet<ControlAssignment> attributeOverwrite = cg.Interpret(shape.Control);
+        if (shape.Control.Count != 0) {
+            HashSet<ControlAssignment> attributeOverwrite = new HashSet<ControlAssignment>();
+            foreach (string control in shape.Control) {
+                attributeOverwrite.UnionWith(cg.Interpret(control));
+            }
+            
             return this.Assign(attributeOverwrite, nodePlacement);
         }
 
-        return (new ForwardCarry(), "");
+        return (new ForwardCarry(), new HashSet<string>());
     }
 
-    private (ForwardCarry, string) DoWFC((ForwardCarry startState, string actSymbol) state, IShape shape, ShapeGraph splitGraph, NodeMap nodePlacement) {
-        // WFC was not activated
-        if (!this.cwfc.ContainsKey(state.actSymbol))
-            return (new ForwardCarry(), "");
+    private (ForwardCarry, HashSet<string>) DoWFC((ForwardCarry startState, HashSet<string> actSymbols) state, IShape shape, ShapeGraph splitGraph, NodeMap nodePlacement) {
+        HashSet<ControlAssignment> assignments = new HashSet<ControlAssignment>();
+        foreach (string act in state.actSymbols) {
+            // WFC was not activated
+            if (!this.cwfc.ContainsKey(act))
+                continue;
 
-        // Collapse the WFC
-        HashSet<ControlAssignment> assignments = this.WFC[state.actSymbol].Collapse(splitGraph, state.startState);
+            // Collapse the WFC
+            assignments.UnionWith(this.WFC[act].Collapse(splitGraph, state.startState));
+        }
+
         return this.Assign(assignments, nodePlacement);
     }
 
@@ -115,7 +124,7 @@ public class Control {
             }
         }
 
-        (ForwardCarry carry, string act) state;
+        (ForwardCarry carry, HashSet<string> act) state;
         state = this.DoGrammar(shape, nodePlacement);
         state = this.DoWFC(state, shape, splitGraph[0], nodePlacement);
         // TODO: Can add more steps into this pipeline

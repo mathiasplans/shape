@@ -8,7 +8,9 @@ namespace Shape {
             private Type symbol;
             private IShape shape;
             private HashSet<(Node, Attributes)> connections;
+            private bool isterm = false;
             public IShape Shape {get {return this.shape;}}
+            public bool IsTerminal {get {return this.isterm;} set {this.isterm = value;}}
 
             public HashSet<(Node, Attributes)> Connections {get {return this.connections;}}
 
@@ -74,10 +76,10 @@ namespace Shape {
         public int Count {get {return this.nodes.Count;}}
 
         private HashSet<Node> AddGraph(ShapeGraph other, HashSet<Node> edges) {
-            HashSet<Node> shapeNodes = other.nodes;
-            
             if (other == null)
-                return shapeNodes;
+                return new HashSet<Node>();
+            
+            HashSet<Node> shapeNodes = other.nodes;
 
             // For each node in the other shape graph, check
             // if there are connections to this shape graph
@@ -153,7 +155,7 @@ namespace Shape {
                 foreach ((ShapeGraph, Type) prototype in prototypes) {
                     // NOTE: This only works with one node!
                     foreach (Node protonode in prototype.Item1.nodes) {
-                        if (node == protonode)
+                        if (node == protonode && !node.IsTerminal)
                             o.Add((node, prototype.Item2));
                     }
                 }
@@ -162,14 +164,14 @@ namespace Shape {
             return o;
         }
 
-        public void Interpret(HashSet<(ShapeGraph, Type)> prototypes, Control control) {
+        public bool Interpret(HashSet<(ShapeGraph, Type)> prototypes, Control control) {
             // Get all the non-terminals
             List<(Node, Type)> nonterminals = this.GetNonTerminals(prototypes);
 
             // If no non-terminals exist, it is finished
             // TODO: return boolean value
             if (nonterminals.Count == 0)
-                return;
+                return false;
 
             // Take a random
             Random rnd = new Random();
@@ -183,8 +185,10 @@ namespace Shape {
             List<IShape> newShapes = shape.NextShapes();
 
             // If the size of new shapes is 0, it is a terminal
-            if (newShapes.Count == 0)
-                return;
+            if (newShapes.Count == 0) {
+                randomNonTerminal.Item1.IsTerminal = true;
+                return true;
+            }
 
             // Get the virtual connection
             IShape vcshape = null;
@@ -250,6 +254,8 @@ namespace Shape {
 
             // Merge the split graph with this graph
             this.AddGraph(mergedGraph, removedEdges);
+
+            return true;
         }
 
         public List<IShape> GetShapes() {

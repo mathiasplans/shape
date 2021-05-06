@@ -97,7 +97,7 @@ public class ExampleGrammar1 {
             new Vertex(min, min))
         );
 
-        start.Control = "A";
+        start.Control.Add("A");
 
         // Define the control grammar
         Control control = new Control();

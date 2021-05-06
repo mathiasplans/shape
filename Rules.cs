@@ -71,7 +71,13 @@ public class Rules {
             return r[index];
         }
 
-        return null;
+        string a = "";
+
+        foreach ((string name, IAttribute attr) in attrs) {
+            a += $"  {name} - {attr.Range()}\n";
+        }
+
+        throw new Exception($"The attributes of shape {typeof(T).ToString()} allow no rules to be selected:\n" + a);
     }
 
     public HashSet<Type> GetAllLHS() {

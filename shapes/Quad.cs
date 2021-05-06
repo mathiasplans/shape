@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 
 namespace Shape {
-    public class Triad : IShape {
+    public class Quad : IShape {
         private static readonly List<IShape> dummyList = new List<IShape>();
         private Attributes attributes;
         private Vertex[] v;
@@ -11,21 +11,25 @@ namespace Shape {
         private Random rnd;
         private ShapeGraph shapeGraph;
         private (uint x, uint y) locator;
-        private string control = "";
+        private HashSet<string> control = new HashSet<string>();
         private VirtualConnection vc = null;
-        private string name = "Triad";
+        protected string name = "Quad";
 
         public Vertex v1 {get {return this.v[0];}}
         public Vertex v2 {get {return this.v[1];}}
         public Vertex v3 {get {return this.v[2];}}
+        public Vertex v4 {get {return this.v[3];}}
         public Line l1 {get {return this.l[0];}}
         public Line l2 {get {return this.l[1];}}
         public Line l3 {get {return this.l[2];}}
-        public Type Symbol {get { return typeof(Triad);}}
+        public Line l4 {get {return this.l[3];}}
+
+
+        public virtual Type Symbol {get { return typeof(Quad);}}
         public Attributes Attributes {get {return this.attributes;}}
         public ShapeGraph Graph {get {return this.shapeGraph;}}
         public (uint, uint) Locator {get {return this.locator;}}
-        public string Control {get {return this.control;} set {this.control = value;}}
+        public HashSet<string> Control {get {return this.control;}}
         public VirtualConnection VC {get {return this.vc;} set {this.vc = value;}}
         public Vertex Center {get {
             Vertex c = new Vertex(0f, 0f);
@@ -33,7 +37,7 @@ namespace Shape {
                 c += vert;
             }
 
-            c /= 3f;
+            c /= 4f;
 
             return c;
         }}
@@ -41,33 +45,35 @@ namespace Shape {
 
 
         public static ShapeGraph Prototype() {
-            return new ShapeGraph(typeof(Triad));
+            return new ShapeGraph(typeof(Quad));
         }
 
         public static IShape Etalon(Rules rules, float width) {
             Vertex v1 = new Vertex(0, width);
-            Vertex v2 = new Vertex(width / 2, 0);
-            Vertex v3 = new Vertex(width, width);
+            Vertex v2 = new Vertex(width, width);
+            Vertex v3 = new Vertex(width, 0);
+            Vertex v4 = new Vertex(0, 0);
 
-            return new Triad(rules, (v1, v2, v3));
+            return new Quad(rules, (v1, v2, v3, v4));
         }
 
         private void CalculateLines() {
             this.l = new Line[] {
                 new Line(this.v1, this.v2), 
                 new Line(this.v2, this.v3), 
-                new Line(this.v3, this.v1)
+                new Line(this.v3, this.v4), 
+                new Line(this.v4, this.v1)
             };
         }
 
-        private void InitializeVertices((Vertex v1, Vertex v2, Vertex v3) vertices) {
-            this.v = new Vertex[] {vertices.v1, vertices.v2, vertices.v3};
+        private void InitializeVertices((Vertex v1, Vertex v2, Vertex v3, Vertex v4) vertices) {
+            this.v = new Vertex[] {vertices.v1, vertices.v2, vertices.v3, vertices.v4};
             this.CalculateLines();
 
             this.shapeGraph = new ShapeGraph(this);
         }
         
-        public Triad(Rules rules, (Vertex v1, Vertex v2, Vertex v3) vertices) {
+        public Quad(Rules rules, (Vertex v1, Vertex v2, Vertex v3, Vertex v4) vertices) {
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = new Attributes();
@@ -75,7 +81,7 @@ namespace Shape {
             this.InitializeVertices(vertices);
         }
 
-        public Triad(Rules rules, Attributes attributes, (Vertex v1, Vertex v2, Vertex v3) vertices) {
+        public Quad(Rules rules, Attributes attributes, (Vertex v1, Vertex v2, Vertex v3, Vertex v4) vertices) {
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = attributes;
@@ -83,7 +89,7 @@ namespace Shape {
             this.InitializeVertices(vertices);
         }
 
-        public Triad(Rules rules, Attributes attributes, (uint, uint) locator, (Vertex v1, Vertex v2, Vertex v3) vertices) {
+        public Quad(Rules rules, Attributes attributes, (uint, uint) locator, (Vertex v1, Vertex v2, Vertex v3, Vertex v4) vertices) {
             this.rules = rules;
             this.rnd = new Random();
             this.attributes = attributes;
@@ -91,8 +97,8 @@ namespace Shape {
             this.InitializeVertices(vertices);
         }
 
-        public List<IShape> NextShapes() {
-            var shapeGetter = this.rules.Next<Triad>(this.attributes);
+        protected List<IShape> NextShape<T>() {
+            var shapeGetter = this.rules.Next<T>(this.attributes);
             List<IShape> newShapes = shapeGetter(this);
 
             if (this.VC != null) {
@@ -108,8 +114,13 @@ namespace Shape {
 
                 newShapes.AddRange(vcShapes);
             }
+
             
             return newShapes;
+        }
+
+        public virtual List<IShape> NextShapes() {
+            return this.NextShape<Quad>();
         }
 
         public List<Vertex> GetVertices() {
@@ -119,7 +130,7 @@ namespace Shape {
         public List<Line> GetLines() {
             return new List<Line>(this.l);
         }
-               
+
         public void SetVertices(List<Vertex> newVerts) {
             for (int i = 0; i < newVerts.Count; ++i) {
                 this.v[i] = newVerts[i];
@@ -129,11 +140,16 @@ namespace Shape {
         }
 
         public IShape Copy() {
-            return new Triad(this.rules, this.attributes.Copy(), this.locator, (this.v1.Copy(), this.v2.Copy(), this.v3.Copy()));
+            Quad q = new Quad(this.rules, this.attributes.Copy(), this.locator, (this.v1.Copy(), this.v2.Copy(), this.v3.Copy(), this.v4.Copy()));
+            foreach (string c in this.Control) {
+                q.Control.Add(c);
+            }
+            q.name = this.name;
+            return q;
         }
 
         public override string ToString() {
-            return "T";
+            return "Q";
         }
     }
 }
