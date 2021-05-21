@@ -5,7 +5,7 @@ using System;
 using Shape;
 
 public class ExampleGrammar2 {
-    public static (List<IShape>, List<(IShape, List<IShape>)>) Run(int min, int max, uint times) {
+    public static (List<List<IShape>>, List<(IShape, List<IShape>)>) Run(int min, int max, uint times) {
         Rules rules = new Rules();
 
         rules.AddRule(
@@ -142,7 +142,7 @@ public class ExampleGrammar2 {
         start.Control.Add("S");
 
         // List<IShape> shapes = Interpreter.Interpret(start, 10);
-        List<IShape> shapes = Interpreter2.Interpret(start, rules, control, times);
+        List<List<IShape>> shapes = Interpreter2.Interpret(start, rules, control, times);
 
         return (shapes, rules.RuleExamples(100f));
     }

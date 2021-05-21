@@ -5,7 +5,7 @@ using System;
 using Shape;
 
 public class ExampleGrammar4 {
-    public static (List<IShape>, List<(IShape, List<IShape>)>) Run(int min, int max, uint times) {
+    public static (List<List<IShape>>, List<(IShape, List<IShape>)>) Run(int min, int max, uint times) {
         Rules rules = new Rules();
 
         rules.AddRule(
@@ -19,7 +19,7 @@ public class ExampleGrammar4 {
                 Floor f1 = new Floor(rules, start.Attributes.Copy(), (0, 2), (start.v1, start.v2, v1[1], v2[0]));
                 Floor f2 = new Floor(rules, start.Attributes.Copy(), (0, 1), (v2[0], v1[1], v1[0], v2[1]));
                 Floor f3 = new Floor(rules, start.Attributes.Copy(), (0, 0), (v2[1], v1[0], start.v3, start.v4));
-              
+
                 return new List<IShape> {f1, f2, f3};
             }
         );
@@ -84,7 +84,7 @@ public class ExampleGrammar4 {
                 Section s1 = new Section(rules, vertical.Attributes.Copy(), (0, 2), (vertical.v1, vertical.v2, v1[1], v2[0]));
                 Section s2 = new Section(rules, vertical.Attributes.Copy(), (0, 1), (v2[0], v1[1], v1[0], v2[1]));
                 Roof r = new Roof(rules, vertical.Attributes.Copy(), (0, 0), (v2[1], v1[0], vertical.v3, vertical.v4));
-              
+
                 return new List<IShape> {s1, s2, r};
             }
         );
@@ -210,7 +210,7 @@ public class ExampleGrammar4 {
                 Attributes a = section.Attributes.Copy();
                 a.Set("Corn", new ScalarAttribute(0f));
                 a.Set("Bar", new ScalarAttribute(0f));
-                
+
                 Attributes b = a.Copy();
                 b.Set("R", new ScalarAttribute(255f));
                 b.Set("G", new ScalarAttribute(255f));
@@ -274,7 +274,7 @@ public class ExampleGrammar4 {
 
                 Quad q3 = new Quad(rules, section.Attributes.Copy(), (0, 3), (v2[0], v4[0], v3[0], v2[1]));
                 Quad q4 = new Quad(rules, section.Attributes.Copy(), (0, 4), (v1[1], v4[1], v3[1], v1[0]));
-         
+
                 Attributes a = section.Attributes.Copy();
                 a.Set("R", new ScalarAttribute(255f));
                 a.Set("G", new ScalarAttribute(255f));
@@ -285,7 +285,7 @@ public class ExampleGrammar4 {
                 return new List<IShape> {q1, q2, q3, q4, w};
             }
         );
-    
+
         rules.AddRule(
             new Attributes(
                 ("Corn", new ScalarAttribute(0f)),
@@ -309,7 +309,7 @@ public class ExampleGrammar4 {
 
                 Quad q3 = new Quad(rules, section.Attributes.Copy(), (0, 3), (v2[0], v4[0], v3[0], v2[1]));
                 Quad q4 = new Quad(rules, section.Attributes.Copy(), (0, 4), (v1[1], v4[1], v3[1], v1[0]));
-         
+
                 Window w = new Window(rules, section.Attributes.Copy(), (1, 0), (v4[0], v4[1], v3[1], v3[0]));
 
                 return new List<IShape> {q1, q2, q3, q4, w};
@@ -326,7 +326,7 @@ public class ExampleGrammar4 {
 
                 Quad q1 = new Quad(rules, section.Attributes.Copy(), (0, 0), (section.v1, section.v4, v2[0], v1[1]));
                 Quad q2 = new Quad(rules, section.Attributes.Copy(), (0, 2), (v1[0], v2[1], section.v3, section.v2));
-         
+
                 Window w = new Window(rules, section.Attributes.Copy(), (1, 0), (v2[0], v1[1], v1[0], v2[1]));
 
                 return new List<IShape> {q1, q2, w};
@@ -362,7 +362,7 @@ public class ExampleGrammar4 {
 
         rules.AddRule(
             new Attributes(
-                
+
             ),
             (Window window) => {
                 Vertex[] v1 = window.l1.Sections(0.05f, 0.95f);
@@ -379,7 +379,7 @@ public class ExampleGrammar4 {
 
                 Quad q3 = new Quad(rules, window.Attributes.Copy(), (0, 3), (v2[0], v4[0], v3[0], v2[1]));
                 Quad q4 = new Quad(rules, window.Attributes.Copy(), (0, 4), (v1[1], v4[1], v3[1], v1[0]));
-         
+
                 Glass g = new Glass(rules, window.Attributes.Copy(), (1, 0), (v4[0], v4[1], v3[1], v3[0]));
 
                 return new List<IShape> {q1, q2, q3, q4, g};
@@ -488,12 +488,12 @@ public class ExampleGrammar4 {
 
         rules.AddRule(null, (Cornice cornice) => {return new List<IShape>();});
         rules.AddRule(null, (Bar bar) => {return new List<IShape>();});
-        rules.AddRule(null, (Quad bar) => {return new List<IShape>();});    
+        rules.AddRule(null, (Quad bar) => {return new List<IShape>();});
 
         Start start = new Start(
             rules,
             new Attributes(
-                ("Floors", new ScalarAttribute(2f)),
+                ("Floors", new ScalarAttribute(3f)),
                 ("Door", new ScalarAttribute(0f)),
                 ("Corn", new ScalarAttribute(1f)),
                 ("Bar", new ScalarAttribute(0f)),
@@ -510,9 +510,9 @@ public class ExampleGrammar4 {
                 ("RoofSlanted", new ScalarAttribute(0f))
             ),
             (0, 0),
-           (new Vertex(min, max), 
-            new Vertex(max, max), 
-            new Vertex(max, min), 
+           (new Vertex(min, max),
+            new Vertex(max, max),
+            new Vertex(max, min),
             new Vertex(min, min))
         );
 
@@ -570,7 +570,7 @@ public class ExampleGrammar4 {
 
         var ruleexamples = rules.RuleExamples(100f);
 
-        List<IShape> shapes = Interpreter2.Interpret(start, rules, control, 0);
+        List<List<IShape>> shapes = Interpreter2.Interpret(start, rules, control, 0);
 
         return (shapes, ruleexamples);
     }

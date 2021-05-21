@@ -13,8 +13,8 @@ public class MainClass {
        CreateImage(32 * 12 * sf);
     }
 
-    private static (List<IShape>, List<(IShape, List<IShape>)>) GetShapes(int min, int max) {
-        return ExampleGrammar3.Run(min, max, 20);
+    private static (List<List<IShape>>, List<(IShape, List<IShape>)>) GetShapes(int min, int max) {
+        return ExampleGrammar4.Run(min, max, 20);
     }
 
     public static Graphics GetGraphics(Bitmap bmp) {
@@ -58,13 +58,13 @@ public class MainClass {
             for (int i = 2; i < points.Count; ++i) {
                 gr.FillPolygon(br, new Point[] {p1, points[i - 1], points[i]});
             }
-            
+
             // Draw the lines
             foreach (Line line in lines) {
                 gr.DrawLine(pen, (Point) line.p1, (Point) line.p2);
             }
         }
-        
+
     }
 
     public static void DrawSymbols(Graphics gr, List<IShape> shapes, Font font, Brush brush, float offx, float offy) {
@@ -89,7 +89,7 @@ public class MainClass {
         HashSet<ShapeGraph.Node> done = new HashSet<ShapeGraph.Node>();
         foreach (ShapeGraph.Node node in sg) {
             Vertex nodeCenter = node.Shape.Center;
-            // Draw lines between the vertices  
+            // Draw lines between the vertices
             foreach ((ShapeGraph.Node, Attributes) conn in node.Connections) {
                 if (done.Contains(conn.Item1))
                     continue;
@@ -125,7 +125,7 @@ public class MainClass {
             float[,] commontranslate = new[,] {
                 {factor, 0f, 10f * factor},
                 {0f, factor, 10f * factor},
-                {0f, 0f, 1f}      
+                {0f, 0f, 1f}
             };
 
             float[,] translate = new[,] {
@@ -161,12 +161,12 @@ public class MainClass {
             DrawLines(shapeGr, allShapes, factor / 2f);
             DrawSymbols(shapeGr, allShapes, symbolfont, brush, 7f * factor, 11f * factor);
             DrawGraph(graphGr, allShapes, factor);
-            
+
             shapeGr.DrawString("→", arrowfont, brush, new PointF(111f * factor, 3f * factor));
             graphGr.DrawString("→", arrowfont, brush, new PointF(111f * factor, 3f * factor));
 
-            shapeBmp.Save($"rule{count}.png", ImageFormat.Png);
-            graphBmp.Save($"rule{count}_graph.png", ImageFormat.Png);
+            shapeBmp.Save($"out/rule{count}.png", ImageFormat.Png);
+            graphBmp.Save($"out/rule{count}_graph.png", ImageFormat.Png);
 
             count += 1;
         }
@@ -175,23 +175,34 @@ public class MainClass {
     private static void CreateImage(int size) {
         Bitmap bmp = new Bitmap(size, size);
 
-        (List<IShape> shapes, List<(IShape, List<IShape>)> examples) = GetShapes(size / 12, 11 * size / 12);
-    
+        (List<List<IShape>> shapes, List<(IShape, List<IShape>)> examples) = GetShapes(size / 12, 11 * size / 12);
+        List<IShape> lastShape = shapes[shapes.Count - 1];
+
         Graphics gr = GetGraphics(bmp);
 
-        DrawLines(gr, shapes, sf);
+        DrawLines(gr, lastShape, sf);
 
-        DrawRules(examples);
+        // DrawRules(examples);
 
-        bmp.Save("split.png", ImageFormat.Png);
+        bmp.Save("out/split.png", ImageFormat.Png);
 
-        // Graph of the result
-        bmp = new Bitmap(size, size);
+        // // Graph of the result
+        // bmp = new Bitmap(size, size);
 
-        gr = GetGraphics(bmp);
+        // gr = GetGraphics(bmp);
 
-        DrawGraph(gr, shapes, size / 200f);
+        // DrawGraph(gr, lastShape, size / 200f);
 
-        bmp.Save("split_graph.png", ImageFormat.Png);
+        // bmp.Save("out/split_graph.png", ImageFormat.Png);
+
+        // Create a video
+        int fcount = 0;
+        foreach (List<IShape> s in shapes) {
+            Bitmap framebmp = new Bitmap(size, size);
+            Graphics framegr = GetGraphics(framebmp);
+            DrawLines(framegr, s, sf);
+            framebmp.Save($"out/video{fcount}.png", ImageFormat.Png);
+            fcount += 1;
+        }
     }
 }

@@ -78,7 +78,7 @@ namespace Shape {
         private HashSet<Node> AddGraph(ShapeGraph other, HashSet<Node> edges) {
             if (other == null)
                 return new HashSet<Node>();
-            
+
             HashSet<Node> shapeNodes = other.nodes;
 
             // For each node in the other shape graph, check
@@ -89,7 +89,7 @@ namespace Shape {
                     if (otherNode.Shape.LineOverlap(ownNode.Shape)) {
                         otherNode.Connect(ownNode, null);
                     }
-                } 
+                }
             }
 
             // Then add the nodes in the other graph to own graph
@@ -164,14 +164,14 @@ namespace Shape {
             return o;
         }
 
-        public bool Interpret(HashSet<(ShapeGraph, Type)> prototypes, Control control) {
+        public (bool, bool) Interpret(HashSet<(ShapeGraph, Type)> prototypes, Control control) {
             // Get all the non-terminals
             List<(Node, Type)> nonterminals = this.GetNonTerminals(prototypes);
 
             // If no non-terminals exist, it is finished
             // TODO: return boolean value
             if (nonterminals.Count == 0)
-                return false;
+                return (false, true);
 
             // Take a random
             Random rnd = new Random();
@@ -187,7 +187,7 @@ namespace Shape {
             // If the size of new shapes is 0, it is a terminal
             if (newShapes.Count == 0) {
                 randomNonTerminal.Item1.IsTerminal = true;
-                return true;
+                return (true, false);
             }
 
             // Get the virtual connection
@@ -255,7 +255,7 @@ namespace Shape {
             // Merge the split graph with this graph
             this.AddGraph(mergedGraph, removedEdges);
 
-            return true;
+            return (true, true);
         }
 
         public List<IShape> GetShapes() {
